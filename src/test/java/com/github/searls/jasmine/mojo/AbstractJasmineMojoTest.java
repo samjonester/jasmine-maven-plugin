@@ -34,6 +34,7 @@ public class AbstractJasmineMojoTest {
   private static final String ENCODING = "UTF-8";
   private static final String SCRIPT_LOADER_PATH = "scriptloaderpath";
   private static final String PARENT_PROJECT_PATH = "/parent/project/path";
+  private static final String CUSTOM_REPORTER = "foo.js";
 
   @InjectMocks
   @Spy
@@ -129,6 +130,18 @@ public class AbstractJasmineMojoTest {
   @Test
   public void testGetSourceEncoding() {
     assertThat(this.subject.getSourceEncoding(), is(ENCODING));
+  }
+
+  @Test
+  public void testGetCustomReporter() throws ResourceNotFoundException, MojoExecutionException, MojoFailureException, FileResourceCreationException {
+    File customReporter = mock(File.class);
+    this.subject.customReporter = CUSTOM_REPORTER;
+    when(this.mavenProject.getFile()).thenReturn(this.projectFile);
+    when(this.projectFile.getParentFile()).thenReturn(this.parentProjectFile);
+    when(this.parentProjectFile.getAbsolutePath()).thenReturn(PARENT_PROJECT_PATH);
+    when(this.locator.getResourceAsFile(CUSTOM_REPORTER)).thenReturn(customReporter);
+    this.subject.execute();
+    assertThat(this.subject.getCustomReporter(), is(customReporter));
   }
 
   @Test

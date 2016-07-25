@@ -32,7 +32,7 @@ public class SpecRunnerExecutor {
   }
 
 
-  public JasmineResult execute(URL runnerUrl, File junitXmlReport, WebDriver driver, int timeout, boolean debug, Log log, String format) {
+  public JasmineResult execute(URL runnerUrl, File junitXmlReport, WebDriver driver, int timeout, boolean debug, Log log, String format, File customReporter) {
     try {
       if (!(driver instanceof JavascriptExecutor)) {
         throw new RuntimeException("The provided web driver can't execute JavaScript: " + driver.getClass());
@@ -44,7 +44,7 @@ public class SpecRunnerExecutor {
       this.checkForConsoleErrors(driver, log);
 
       JasmineResult jasmineResult = new JasmineResult();
-      jasmineResult.setDetails(this.buildReport(executor, format));
+      jasmineResult.setDetails(this.buildReport(executor, format, customReporter));
       FileUtils.writeStringToFile(junitXmlReport, this.buildJunitXmlReport(executor, debug), "UTF-8");
 
       return jasmineResult;
@@ -70,12 +70,20 @@ public class SpecRunnerExecutor {
     }
   }
 
-  private String buildReport(JavascriptExecutor driver, String format) throws IOException {
+  private String buildReport(JavascriptExecutor driver, String format, File customReporter) throws IOException {
     String script =
-      this.ioUtilsWrapper.toString(BUILD_REPORT_JS) +
+      readReporterOrDefault(customReporter) +
         "return jasmineMavenPlugin.printReport(window.jsApiReporter,{format:'" + format + "'});";
     Object report = driver.executeScript(script);
     return report.toString();
+  }
+
+  private String readReporterOrDefault(File reporter) throws IOException {
+    if (null != reporter) {
+      return this.ioUtilsWrapper.toString(reporter);
+    } else {
+      return this.ioUtilsWrapper.toString(BUILD_REPORT_JS);
+    }
   }
 
   private String buildJunitXmlReport(JavascriptExecutor driver, boolean debug) throws IOException {

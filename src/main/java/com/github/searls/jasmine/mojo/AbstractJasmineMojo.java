@@ -103,6 +103,16 @@ public abstract class AbstractJasmineMojo extends AbstractMojo implements Jasmin
   protected String customRunnerConfiguration;
 
   /**
+   * <p> Specify a custom reporter to be used to print the test report.</p>
+   * <p>Example usage:</p>
+   * <pre>
+   * &lt;customReporter&gt;${project.basedir}/src/test/resources/myCustomReporter.js&lt;/customReporter&gt;
+   * </pre>
+   */
+  @Parameter
+  protected String customReporter;
+
+  /**
    * Target directory for files created by the plugin.
    *
    * @since 1.1.0
@@ -373,6 +383,7 @@ public abstract class AbstractJasmineMojo extends AbstractMojo implements Jasmin
 
   private File customRunnerTemplateFile;
   private File customRunnerConfigurationFile;
+  private File customReporterFile;
 
 
   @Override
@@ -459,6 +470,11 @@ public abstract class AbstractJasmineMojo extends AbstractMojo implements Jasmin
   }
 
   @Override
+  public File getCustomReporter() {
+    return this.customReporterFile;
+  }
+
+  @Override
   public File getBasedir() {
     return this.mavenProject.getBasedir();
   }
@@ -498,6 +514,7 @@ public abstract class AbstractJasmineMojo extends AbstractMojo implements Jasmin
   private void loadResources() throws MojoExecutionException {
     this.customRunnerTemplateFile = this.getResourceAsFile("customRunnerTemplate", this.customRunnerTemplate);
     this.customRunnerConfigurationFile = this.getResourceAsFile("customRunnerConfiguration", this.customRunnerConfiguration);
+    this.customReporterFile = this.getResourceAsFile("customReporter", this.customReporter);
   }
 
   private File getResourceAsFile(String parameter, String resourceLocation) throws MojoExecutionException {
